@@ -18,7 +18,7 @@ def lambda_handler(event, context):
         try:
             source_bucket = record['s3']['bucket']['name']
             source_key = record['s3']['object']['key']
-            trg_bucket = 'richiebtlr-test-target'
+            trg_bucket = 'lambda1-test-target'
             copy_source = {'Bucket': source_bucket, 'Key': source_key}
             
             logger.info(f"Copying file {source_key} from bucket {source_bucket} to bucket {trg_bucket}") 
@@ -33,5 +33,5 @@ def lambda_handler(event, context):
     
     return {
         'statusCode': 200,
-        'body': json.dumps('File copied successfully')
+        'body': json.dumps('File copied successfully, job well done!')
     }
