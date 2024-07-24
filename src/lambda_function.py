@@ -33,5 +33,5 @@ def lambda_handler(event, context):
     
     return {
         'statusCode': 200,
-        'body': json.dumps('File copied successfully, job well done!')
+        'body': json.dumps('File copied successfully, job well done! The file has loaded! Time for a coffee')
     }
