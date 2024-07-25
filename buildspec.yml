@@ -4,15 +4,14 @@ phases:
     runtime-versions:
       python: 3.12
     commands:
-      - echo "Installing dependencies..."
-      - pip install -r requirements.txt
+      - echo "Skipping dependency installation..."
   build:
     commands:
       - echo "Zipping deployment package..."
-      # Create the deployment package
       - zip -r9 deployment_package.zip .
   post_build:
     commands:
       - echo "Updating Lambda function..."
       - aws lambda update-function-code --function-name lambda1-test --zip-file fileb://deployment_package.zip
       - echo "DONE and COMPLETED!!"
+
