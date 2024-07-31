@@ -29,9 +29,13 @@ def lambda_handler(event, context):
     config_bucket = 'lambda1-test-config'
     config_key = 'config.json'
 
-    metadata_list = []
-    trg_bucket = 'lambda1-test-target'
+    # fetch configuration data within config file
+    config = get_config(config_bucket,config_key)
+    trg_bucket = config['target_bucket']
+    metadata_filename = config['metadata_filename']
 
+    metadata_list = []
+    
     for record in event['Records']:
         try:
             source_bucket = record['s3']['bucket']['name']
@@ -63,7 +67,6 @@ def lambda_handler(event, context):
             raise e
 
     metadata_content = "".join(metadata_list)
-    metadata_filename = 'file_metadata.txt'
 
     try:
         s3.put_object(
