@@ -1,0 +1,4 @@
+{
+    "target_bucket": "lambda1-test-target",
+    "metadata_filename" : "file_metadata.txt"
+}
