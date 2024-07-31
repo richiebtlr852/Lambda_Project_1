@@ -13,25 +13,54 @@ s3 = boto3.client('s3')
 
 def lambda_handler(event, context):
     logger.info("Received event: " + json.dumps(event))
-    
+    metadata_list = []
+    trg_bucket = 'lambda1-test-target'
+
     for record in event['Records']:
         try:
             source_bucket = record['s3']['bucket']['name']
             source_key = record['s3']['object']['key']
-            trg_bucket = 'lambda1-test-target'
             copy_source = {'Bucket': source_bucket, 'Key': source_key}
-            
-            logger.info(f"Copying file {source_key} from bucket {source_bucket} to bucket {trg_bucket}") 
+            event_time = record['eventTime']
+
+            # Prepare metadata string
+            metadata_str = f"Filename: {source_key}, Source Bucket: {source_bucket}, Load time: {event_time}\n"
+            metadata_list.append(metadata_str)
+        except Exception as e:
+            logger.error(f'Error extracting file metadata and processing record: {e}')
+
+    for record in event['Records']:
+        try:
+            source_bucket = record['s3']['bucket']['name']
+            source_key = record['s3']['object']['key']
+            copy_source = {'Bucket': source_bucket, 'Key': source_key}
+
+            logger.info(f"Copying file {source_key} from bucket {source_bucket} to bucket {trg_bucket}")
             s3.copy_object(
-                CopySource=copy_source, 
-                Bucket=trg_bucket, 
-                Key=source_key)
-        
+                CopySource=copy_source,
+                Bucket=trg_bucket,
+                Key=source_key
+            )
+
         except Exception as e:
             logger.error(f"Error copying the file {source_key} from bucket {source_bucket} to bucket {trg_bucket}: {e}")
             raise e
-    
+
+    metadata_content = "".join(metadata_list)
+    metadata_filename = 'file_metadata.txt'
+
+    try:
+        s3.put_object(
+            Bucket=trg_bucket,
+            Key=metadata_filename,
+            Body=metadata_content
+        )
+        logger.info(f'Metadata file created: {metadata_filename}, and loaded into target s3 bucket {trg_bucket}')
+    except Exception as e:
+        logger.error(f"Error creating metadata file in bucket {trg_bucket}: {e}")
+        raise e
+
     return {
         'statusCode': 200,
-        'body': json.dumps('File copied successfully, job well done! The file has loaded! Time for a coffee')
+        'body': json.dumps('Files copied successfully, metadata file created. Job well done!')
     }
